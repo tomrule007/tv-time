@@ -5,6 +5,7 @@ import { RokuState } from './roku';
 
 export interface StateRecord extends RokuState {
   watched: boolean;
+  pollTime?: number; // Poll interval in milliseconds
 }
 
 const stateFile = path.resolve(process.cwd(), config.stateLogPath);

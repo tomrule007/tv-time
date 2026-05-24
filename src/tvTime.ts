@@ -1,20 +1,28 @@
-import config from './config';
+import config, { getDayLimit } from './config';
 import { getRokuState, launchRokuApp, RokuState } from './roku';
 import { appendStateRecord, readAllStateRecords, StateRecord } from './db';
 
 function isWatching(state: RokuState): boolean {
+  return !isHomeScreen(state) && !isTvTimeApp(state) && state.activeAppId.toLowerCase() !== 'unknown' && state.powerState !== 'PowerOff';
+}
+
+function isHomeScreen(state: RokuState): boolean {
+  return state.activeAppName.toLowerCase() === 'home';
+}
+
+function isTvTimeApp(state: RokuState): boolean {
   const activeId = state.activeAppId.toLowerCase();
   const activeName = state.activeAppName.toLowerCase();
   const configuredAppId = config.roku.appId.toLowerCase();
-  if (
+  return (
     activeId === configuredAppId ||
     activeId === 'dev' ||
-    activeName === 'home' ||
     activeName.includes('tv-time')
-  ) {
-    return false;
-  }
-  return activeId !== 'unknown' && state.powerState !== 'PowerOff';
+  );
+}
+
+function shouldLaunchLimitApp(state: RokuState, limitReached: boolean): boolean {
+  return limitReached && !isHomeScreen(state) && !isTvTimeApp(state);
 }
 
 function getTodayRecords(records: StateRecord[]): StateRecord[] {
@@ -53,26 +61,18 @@ function computeDailyUsageMinutes(records: StateRecord[]): number {
 }
 
 function computeUsageByApp(records: StateRecord[]) {
-  const ordered = [...records].sort((a, b) => a.timestamp.localeCompare(b.timestamp));
   const byApp: Record<string, number> = {};
   let totalMinutes = 0;
 
-  for (let i = 1; i < ordered.length; i += 1) {
-    const previous = ordered[i - 1];
-    const current = ordered[i];
-    const previousTime = new Date(previous.timestamp).getTime();
-    const currentTime = new Date(current.timestamp).getTime();
-    const deltaMs = currentTime - previousTime;
-    const deltaMinutes = deltaMs / 60000;
-
-    if (deltaMs > getGapThresholdMs()) {
-      continue;
-    }
-
-    if (previous.watched) {
-      totalMinutes += deltaMinutes;
-      const appName = previous.activeAppName || 'Unknown';
-      byApp[appName] = (byApp[appName] || 0) + deltaMinutes;
+  for (const record of records) {
+    // Re-compute watched status using centralized exclusion logic to ensure consistency
+    const isCurrentlyWatching = isWatching(record as RokuState);
+    
+    if (isCurrentlyWatching) {
+      const pollTimeMinutes = (record.pollTime || config.pollIntervalMs) / 60000;
+      totalMinutes += pollTimeMinutes;
+      const appName = record.activeAppName || 'Unknown';
+      byApp[appName] = (byApp[appName] || 0) + pollTimeMinutes;
     }
   }
 
@@ -85,31 +85,8 @@ function computeUsageByApp(records: StateRecord[]) {
 }
 
 function detectDataGaps(records: StateRecord[]) {
-  const ordered = [...records].sort((a, b) => a.timestamp.localeCompare(b.timestamp));
-  const thresholdMs = getGapThresholdMs();
-  const gaps = [];
-
-  for (let i = 1; i < ordered.length; i += 1) {
-    const previous = ordered[i - 1];
-    const current = ordered[i];
-    const startMs = new Date(previous.timestamp).getTime();
-    const endMs = new Date(current.timestamp).getTime();
-    const durationMs = endMs - startMs;
-
-    if (durationMs > thresholdMs) {
-      gaps.push({
-        start: previous.timestamp,
-        end: current.timestamp,
-        minutes: Math.round(durationMs / 60000)
-      });
-    }
-  }
-
-  return gaps;
-}
-
-function getGapThresholdMs(): number {
-  return config.pollIntervalMs * 2.5;
+  // TODO: Implement gap detection if needed in the future
+  return [];
 }
 
 export async function pollAndEvaluateCurrentState() {
@@ -117,16 +94,19 @@ export async function pollAndEvaluateCurrentState() {
   const watched = isWatching(rokuState);
   const record: StateRecord = {
     ...rokuState,
-    watched
+    watched,
+    pollTime: config.pollIntervalMs
   };
 
   await appendStateRecord(record);
 
   const todayRecords = getTodayRecords(await readAllStateRecords());
+  const timeZone = getDeviceTimeZone(todayRecords);
   const usageMinutes = computeDailyUsageMinutes(todayRecords);
-  const limitReached = usageMinutes >= config.dailyLimitMinutes;
+  const dayLimit = getDayLimit(new Date(), timeZone);
+  const limitReached = usageMinutes >= dayLimit;
 
-  if (limitReached && rokuState.activeAppId !== config.roku.appId) {
+  if (shouldLaunchLimitApp(rokuState, limitReached)) {
     await launchRokuApp(config.roku.ip, config.roku.appId);
     return {
       limitReached,
@@ -139,7 +119,7 @@ export async function pollAndEvaluateCurrentState() {
   return {
     limitReached,
     usageMinutes,
-    action: limitReached ? 'already-on-tv-time-app' : 'recorded-state',
+    action: limitReached ? 'limit-reached-no-launch-needed' : 'recorded-state',
     record
   };
 }
@@ -150,13 +130,14 @@ export async function getStatusData() {
   const today = toLocalDateKey(new Date(), timeZone);
   const todayRecords = getTodayRecords(records);
   const usageMinutes = computeDailyUsageMinutes(todayRecords);
+  const dayLimit = getDayLimit(new Date(), timeZone);
   const lastRecord = records.length ? records[records.length - 1] : null;
 
   return {
     serverPort: config.serverPort,
     rokuIp: config.roku.ip,
     timeZone,
-    dailyLimitMinutes: config.dailyLimitMinutes,
+    dailyLimitMinutes: dayLimit,
     todayUsageMinutes: usageMinutes,
     todayRecords: todayRecords.length,
     powerState: lastRecord?.powerState || 'unknown',
@@ -169,6 +150,7 @@ export async function getTodayData() {
   const timeZone = getDeviceTimeZone(records);
   const today = toLocalDateKey(new Date(), timeZone);
   const todayRecords = getTodayRecords(records);
+  const dayLimit = getDayLimit(new Date(), timeZone);
 
   // Enrich records with watched status
   const enrichedRecords = todayRecords.map((record) => ({
@@ -182,6 +164,7 @@ export async function getTodayData() {
     date: today,
     timeZone,
     currentTime: new Date().toISOString(),
+    dailyLimitMinutes: dayLimit,
     todayUsageMinutes: Math.round(usage.totalMinutes),
     appUsage: usage.byApp,
     dataGaps: detectDataGaps(enrichedRecords),
@@ -192,8 +175,9 @@ export async function getTodayData() {
 export async function getDailyLimitStatus() {
   const records = await readAllStateRecords();
   const todayRecords = getTodayRecords(records);
+  const timeZone = getDeviceTimeZone(todayRecords);
   const usageMinutes = computeDailyUsageMinutes(todayRecords);
-  const limitMinutes = config.dailyLimitMinutes;
+  const limitMinutes = getDayLimit(new Date(), timeZone);
   const limitExceeded = usageMinutes >= limitMinutes;
 
   return {

@@ -2,6 +2,8 @@
 
 A lightweight Node.js + Express backend for the TV-TIME Roku app.
 
+**Roku App:** [tv-time-roku](https://github.com/tomrule007/tv-time-roku)
+
 ## Purpose
 - Poll Roku ECP to record TV state.
 - Store state history in a simple append-only log file.

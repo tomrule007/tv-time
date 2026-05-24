@@ -468,13 +468,16 @@
       const currentState = lastRecord ? (isPowered(lastRecord) ? lastRecord.powerState : "Off") : "No data";
       const lastSeen = lastRecord ? formatTime(lastRecord.timestamp) : "--";
       const usage = dashboardData.todayUsageMinutes || 0;
+      const limit = dashboardData.dailyLimitMinutes || 0;
       const gapCount = dashboardData.dataGaps.length;
+      const percentUsed = limit > 0 ? Math.round((usage / limit) * 100) : 0;
+      const isOverLimit = usage >= limit;
 
       document.getElementById("stats").innerHTML = `
-        <div class="stat">
+        <div class="stat ${isOverLimit ? "warning" : ""}">
           <div class="stat-label">Today's Usage</div>
           <div class="stat-value">${minutesLabel(usage)}</div>
-          <div class="stat-note">Excludes Home and data gaps</div>
+          <div class="stat-note">${minutesLabel(limit)} limit (${percentUsed}%)</div>
         </div>
         <div class="stat">
           <div class="stat-label">Current Status</div>
