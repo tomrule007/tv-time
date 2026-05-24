@@ -1,5 +1,5 @@
 import express from 'express';
-import { getStatusData, getTodayData } from '../tvTime';
+import { getStatusData, getTodayData, getDailyLimitStatus } from '../tvTime';
 
 const router = express.Router();
 
@@ -18,6 +18,15 @@ router.get('/today', async (req, res) => {
     res.json(data);
   } catch (error) {
     res.status(500).json({ error: 'Unable to retrieve today data', details: String(error) });
+  }
+});
+
+router.get('/limit', async (req, res) => {
+  try {
+    const data = await getDailyLimitStatus();
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ error: 'Unable to retrieve limit status', details: String(error) });
   }
 });
 

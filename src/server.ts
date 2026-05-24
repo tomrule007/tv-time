@@ -34,7 +34,8 @@ async function startPollingLoop() {
 
 ensureDataDirectory();
 
-app.listen(port, () => {
+app.listen(port, '0.0.0.0', () => {
   console.log(`TV-TIME backend listening on http://localhost:${port}`);
+  console.log(`LAN access enabled on http://0.0.0.0:${port}`);
   startPollingLoop();
 });

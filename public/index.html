@@ -12,393 +12,609 @@
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #f5f5f5;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f4f6f8;
+      color: #1f2933;
       padding: 20px;
     }
 
     .container {
       max-width: 1200px;
       margin: 0 auto;
-      background: white;
+      background: #fff;
       border-radius: 8px;
-      padding: 30px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      padding: 28px;
+      box-shadow: 0 2px 12px rgba(31, 41, 51, 0.08);
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      align-items: flex-start;
+      margin-bottom: 26px;
     }
 
     h1 {
-      color: #333;
-      margin-bottom: 10px;
+      color: #17212b;
+      font-size: 28px;
+      margin-bottom: 8px;
     }
 
-    .date {
-      color: #666;
+    .date,
+    .clock-label {
+      color: #64748b;
       font-size: 14px;
-      margin-bottom: 30px;
+    }
+
+    .clock {
+      text-align: right;
+      min-width: 170px;
+    }
+
+    .clock-time {
+      font-variant-numeric: tabular-nums;
+      font-size: 24px;
+      font-weight: 700;
+      color: #0f172a;
     }
 
     .stats {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 20px;
-      margin-bottom: 30px;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
     }
 
     .stat {
-      padding: 15px;
-      background: #f9f9f9;
-      border-left: 4px solid #4CAF50;
-      border-radius: 4px;
+      padding: 16px;
+      background: #f8fafc;
+      border-left: 4px solid #2f80ed;
+      border-radius: 6px;
+      min-height: 86px;
+    }
+
+    .stat.warning {
+      border-left-color: #d97706;
     }
 
     .stat-label {
       font-size: 12px;
-      color: #666;
+      color: #64748b;
       text-transform: uppercase;
-      margin-bottom: 5px;
+      letter-spacing: 0;
+      margin-bottom: 6px;
     }
 
     .stat-value {
       font-size: 24px;
-      font-weight: bold;
-      color: #333;
+      font-weight: 700;
+      color: #17212b;
     }
 
-    .timeline {
-      margin-top: 30px;
+    .stat-note {
+      margin-top: 4px;
+      font-size: 12px;
+      color: #64748b;
     }
 
-    .timeline-title {
+    .section {
+      margin-top: 28px;
+    }
+
+    .section-title {
       font-size: 14px;
-      font-weight: 600;
-      color: #666;
-      margin-bottom: 10px;
-    }
-
-    .time-labels {
-      display: flex;
-      gap: 0;
-      margin-bottom: 5px;
-      font-size: 12px;
-      color: #999;
-    }
-
-    .time-label {
-      flex: 1;
-      text-align: center;
-    }
-
-    .power-bar {
-      display: flex;
-      gap: 0;
-      height: 30px;
-      background: white;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      overflow: hidden;
-      margin-bottom: 15px;
-    }
-
-    .power-segment {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 9px;
-      color: white;
-      font-weight: bold;
-      position: relative;
-      border-right: 1px solid rgba(255, 255, 255, 0.3);
-    }
-
-    .power-segment:last-child {
-      border-right: none;
-    }
-
-    .power-segment.on {
-      background: #4CAF50;
-    }
-
-    .power-segment.off {
-      background: #ccc;
-      color: #999;
-    }
-
-    .app-bar {
-      display: flex;
-      gap: 0;
-      height: 60px;
-      background: white;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      overflow: hidden;
-      margin-bottom: 15px;
-    }
-
-    .app-segment {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 10px;
-      color: white;
-      font-weight: bold;
-      position: relative;
-      border-right: 1px solid rgba(255, 255, 255, 0.3);
-      text-align: center;
-      padding: 5px;
-      opacity: 1;
-      transition: opacity 0.2s;
-    }
-
-    .app-segment.grayed-out {
-      opacity: 0.3;
-      background: #ccc !important;
-      color: #999 !important;
-    }
-
-    .app-segment:last-child {
-      border-right: none;
-    }
-
-    .legend {
-      margin-top: 20px;
-      padding: 15px;
-      background: #f9f9f9;
-      border-radius: 4px;
-    }
-
-    .legend-title {
-      font-size: 12px;
-      font-weight: 600;
-      color: #666;
+      font-weight: 700;
+      color: #475569;
       margin-bottom: 10px;
       text-transform: uppercase;
     }
 
-    .legend-items {
+    .timeline-shell {
+      position: relative;
+    }
+
+    .time-labels {
+      position: relative;
+      height: 18px;
+      margin-bottom: 6px;
+      font-size: 12px;
+      color: #94a3b8;
+    }
+
+    .time-label {
+      position: absolute;
+      top: 0;
+      transform: translateX(-50%);
+      white-space: nowrap;
+    }
+
+    .time-label.start {
+      transform: translateX(0);
+    }
+
+    .time-label.end {
+      transform: translateX(-100%);
+    }
+
+    .timeline-bar {
+      display: flex;
+      height: 46px;
+      background: #eef2f7;
+      border: 1px solid #d9e2ec;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .segment {
+      min-width: 1px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      border-right: 1px solid rgba(255, 255, 255, 0.35);
+    }
+
+    .segment.idle {
+      color: #64748b;
+      background: #cbd5e1;
+    }
+
+    .segment.gap {
+      color: #7c2d12;
+      background: repeating-linear-gradient(
+        45deg,
+        #fed7aa,
+        #fed7aa 8px,
+        #fdba74 8px,
+        #fdba74 16px
+      );
+    }
+
+    .panels {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+      gap: 24px;
+      align-items: start;
+    }
+
+    .app-usage,
+    .gaps {
+      display: grid;
+      gap: 10px;
+    }
+
+    .usage-row,
+    .gap-row {
+      display: grid;
+      grid-template-columns: minmax(90px, 140px) 1fr auto;
+      gap: 10px;
+      align-items: center;
+      font-size: 14px;
+    }
+
+    .usage-bar {
+      height: 12px;
+      border-radius: 999px;
+      background: #e2e8f0;
+      overflow: hidden;
+    }
+
+    .usage-fill {
+      height: 100%;
+      border-radius: 999px;
+    }
+
+    .gap-row {
+      grid-template-columns: 1fr auto;
+      color: #7c2d12;
+      background: #fff7ed;
+      border-left: 4px solid #f97316;
+      padding: 10px 12px;
+      border-radius: 6px;
+    }
+
+    .legend {
+      margin-top: 16px;
       display: flex;
       flex-wrap: wrap;
-      gap: 15px;
+      gap: 12px;
     }
 
     .legend-item {
-      display: flex;
+      display: inline-flex;
       align-items: center;
-      gap: 8px;
+      gap: 7px;
       font-size: 13px;
+      color: #475569;
     }
 
     .legend-color {
-      width: 16px;
-      height: 16px;
-      border-radius: 2px;
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
     }
 
+    .empty,
     .loading {
-      text-align: center;
-      color: #666;
-      padding: 40px;
+      color: #64748b;
+      padding: 24px 0;
     }
 
     .error {
-      background: #fee;
-      color: #c33;
-      padding: 15px;
-      border-radius: 4px;
+      background: #fff1f2;
+      color: #be123c;
+      padding: 14px;
+      border-radius: 6px;
       margin-bottom: 20px;
-      border-left: 4px solid #c33;
+      border-left: 4px solid #be123c;
+      display: none;
+    }
+
+    @media (max-width: 760px) {
+      body {
+        padding: 12px;
+      }
+
+      .container {
+        padding: 18px;
+      }
+
+      .header,
+      .panels {
+        display: block;
+      }
+
+      .clock {
+        text-align: left;
+        margin-top: 14px;
+      }
+
+      .timeline-bar {
+        height: 54px;
+      }
+
+      .usage-row {
+        grid-template-columns: 95px 1fr auto;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>📺 TV Time Dashboard</h1>
-    <div class="date" id="date"></div>
+  <main class="container">
+    <header class="header">
+      <div>
+        <h1>TV Time Dashboard</h1>
+        <div class="date" id="date"></div>
+      </div>
+      <div class="clock">
+        <div class="clock-label">Current time</div>
+        <div class="clock-time" id="clock">--:--:--</div>
+      </div>
+    </header>
 
-    <div id="error" class="error" style="display: none;"></div>
-
+    <div id="error" class="error"></div>
     <div id="stats" class="stats"></div>
 
-    <div class="timeline">
-      <div class="timeline-title">Power State Timeline</div>
-      <div class="time-labels" id="timeLabels"></div>
-      <div class="power-bar" id="powerBar"></div>
-
-      <div class="timeline-title">App Timeline</div>
-      <div class="time-labels" id="timeLabels2"></div>
-      <div class="app-bar" id="appBar"></div>
-
+    <section class="section">
+      <div class="section-title">Today Timeline</div>
+      <div class="timeline-shell">
+        <div class="time-labels" id="timeLabels"></div>
+        <div class="timeline-bar" id="timelineBar"></div>
+      </div>
       <div class="legend" id="legend"></div>
-    </div>
+    </section>
+
+    <section class="section panels">
+      <div>
+        <div class="section-title">App Stats</div>
+        <div class="app-usage" id="appUsage"></div>
+      </div>
+      <div>
+        <div class="section-title">Data Gaps</div>
+        <div class="gaps" id="gaps"></div>
+      </div>
+    </section>
 
     <div id="loading" class="loading">Loading...</div>
-  </div>
+  </main>
 
   <script>
     const COLORS = {
-      'Unknown': '#999',
-      'Home': '#2196F3',
-      'Netflix': '#E50914',
-      'YouTube': '#FF0000',
-      'Hulu': '#1CE783',
-      'Disney+': '#113CCF',
-      'Prime Video': '#00A8E1',
-      'Plex': '#FFB000',
-      'Roku': '#662D91'
+      Unknown: "#64748b",
+      Home: "#94a3b8",
+      Netflix: "#e50914",
+      YouTube: "#ff0000",
+      Hulu: "#159947",
+      "Disney+": "#2563eb",
+      "Prime Video": "#0891b2",
+      Plex: "#d97706",
+      Roku: "#6d28d9"
     };
 
-    const HOUR_HEIGHT_PIXELS = 60; // pixels per hour for hourly segments
-    let todayRecords = [];
+    const IDLE_COLOR = "#cbd5e1";
+    const DAY_MINUTES = 24 * 60;
+    const GAP_THRESHOLD_MINUTES = 2;
+    let dashboardData = {
+      records: [],
+      appUsage: [],
+      dataGaps: [],
+      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+    };
+
+    function formatDate(date) {
+      return date.toLocaleDateString("en-US", {
+        timeZone: dashboardData.timeZone,
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric"
+      });
+    }
+
+    function formatTime(value) {
+      return new Date(value).toLocaleTimeString("en-US", {
+        timeZone: dashboardData.timeZone,
+        hour: "numeric",
+        minute: "2-digit",
+        second: "2-digit"
+      });
+    }
+
+    function formatTimeRange(start, end) {
+      const options = { timeZone: dashboardData.timeZone, hour: "numeric", minute: "2-digit" };
+      return `${new Date(start).toLocaleTimeString("en-US", options)} - ${new Date(end).toLocaleTimeString("en-US", options)}`;
+    }
+
+    function minutesSinceLocalMidnight(date) {
+      const parts = new Intl.DateTimeFormat("en-US", {
+        timeZone: dashboardData.timeZone,
+        hour: "numeric",
+        minute: "numeric",
+        second: "numeric",
+        hour12: false
+      }).formatToParts(date);
+      const hour = Number(parts.find((part) => part.type === "hour")?.value || 0);
+      const minute = Number(parts.find((part) => part.type === "minute")?.value || 0);
+      const second = Number(parts.find((part) => part.type === "second")?.value || 0);
+      const normalizedHour = hour === 24 ? 0 : hour;
+      return normalizedHour * 60 + minute + second / 60;
+    }
+
+    function minutesLabel(minutes) {
+      if (minutes < 60) {
+        return `${Math.round(minutes)}m`;
+      }
+      const hours = Math.floor(minutes / 60);
+      const mins = Math.round(minutes % 60);
+      return mins ? `${hours}h ${mins}m` : `${hours}h`;
+    }
+
+    function hourLabel(hour) {
+      if (hour === 0 || hour === 24) {
+        return "12 AM";
+      }
+      if (hour === 12) {
+        return "12 PM";
+      }
+      return hour < 12 ? `${hour} AM` : `${hour - 12} PM`;
+    }
+
+    function isPowered(record) {
+      return record.powerState && record.powerState !== "PowerOff" && record.powerState !== "unknown";
+    }
+
+    function appColor(appName) {
+      return COLORS[appName] || "#2f80ed";
+    }
+
+    function sortedRecords() {
+      return [...dashboardData.records].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+    }
 
     async function fetchData() {
       try {
-        const response = await fetch('/api/status/today');
+        const response = await fetch("/api/status/today");
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-
-        if (data.error) {
-          throw new Error(data.error);
+          throw new Error(`HTTP error ${response.status}`);
         }
 
-        todayRecords = data.records || [];
+        dashboardData = await response.json();
+        dashboardData.records = dashboardData.records || [];
+        dashboardData.appUsage = dashboardData.appUsage || [];
+        dashboardData.dataGaps = dashboardData.dataGaps || [];
+        dashboardData.timeZone = dashboardData.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone;
         renderDashboard();
       } catch (error) {
-        showError('Failed to fetch data: ' + error.message);
-        document.getElementById('loading').style.display = 'none';
+        showError(`Failed to fetch data: ${error.message}`);
+      } finally {
+        document.getElementById("loading").style.display = "none";
       }
     }
 
     function showError(message) {
-      const errorDiv = document.getElementById('error');
+      const errorDiv = document.getElementById("error");
       errorDiv.textContent = message;
-      errorDiv.style.display = 'block';
+      errorDiv.style.display = "block";
+    }
+
+    function updateClock() {
+      const now = new Date();
+      document.getElementById("clock").textContent = now.toLocaleTimeString("en-US", {
+        timeZone: dashboardData.timeZone,
+        hour: "numeric",
+        minute: "2-digit",
+        second: "2-digit"
+      });
+      document.getElementById("date").textContent = formatDate(now);
     }
 
     function renderDashboard() {
-      document.getElementById('loading').style.display = 'none';
-
-      // Set date
-      const today = new Date().toISOString().split('T')[0];
-      const dateStr = new Date(today).toLocaleDateString('en-US', { 
-        weekday: 'long', 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
-      });
-      document.getElementById('date').textContent = dateStr;
-
-      // Calculate stats
-      if (todayRecords.length > 0) {
-        let watching = 0;
-        let totalTime = 0;
-
-        for (let i = 1; i < todayRecords.length; i++) {
-          const prev = todayRecords[i - 1];
-          const curr = todayRecords[i];
-          const prevTime = new Date(prev.timestamp).getTime();
-          const currTime = new Date(curr.timestamp).getTime();
-          const deltaMinutes = Math.min((currTime - prevTime) / 60000, 15);
-
-          if (prev.watched) {
-            watching += deltaMinutes;
-          }
-          totalTime += deltaMinutes;
-        }
-
-        const statsHtml = `
-          <div class="stat">
-            <div class="stat-label">Today's Usage</div>
-            <div class="stat-value">${Math.round(watching)}<span style="font-size: 14px;">m</span></div>
-          </div>
-          <div class="stat">
-            <div class="stat-label">Current Status</div>
-            <div class="stat-value">${todayRecords[todayRecords.length - 1].powerState === 'On' ? '🟢 On' : '⚫ Off'}</div>
-          </div>
-          <div class="stat">
-            <div class="stat-label">Recordings</div>
-            <div class="stat-value">${todayRecords.length}</div>
-          </div>
-        `;
-
-        document.getElementById('stats').innerHTML = statsHtml;
-      }
-
+      renderStats();
       renderTimeline();
+      renderAppUsage();
+      renderGaps();
+    }
+
+    function renderStats() {
+      const records = sortedRecords();
+      const lastRecord = records[records.length - 1];
+      const currentApp = lastRecord?.activeAppName || "Unknown";
+      const currentState = lastRecord ? (isPowered(lastRecord) ? lastRecord.powerState : "Off") : "No data";
+      const lastSeen = lastRecord ? formatTime(lastRecord.timestamp) : "--";
+      const usage = dashboardData.todayUsageMinutes || 0;
+      const gapCount = dashboardData.dataGaps.length;
+
+      document.getElementById("stats").innerHTML = `
+        <div class="stat">
+          <div class="stat-label">Today's Usage</div>
+          <div class="stat-value">${minutesLabel(usage)}</div>
+          <div class="stat-note">Excludes Home and data gaps</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Current Status</div>
+          <div class="stat-value">${currentState}</div>
+          <div class="stat-note">${currentApp}</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Last Sample</div>
+          <div class="stat-value">${lastSeen}</div>
+          <div class="stat-note">${records.length} records today</div>
+        </div>
+        <div class="stat ${gapCount ? "warning" : ""}">
+          <div class="stat-label">Data Gaps</div>
+          <div class="stat-value">${gapCount}</div>
+          <div class="stat-note">${gapCount ? "Review the gap list" : "No large gaps found"}</div>
+        </div>
+      `;
     }
 
     function renderTimeline() {
-      // Group records by hour
-      const hourly = {};
-      const startOfDay = new Date();
-      startOfDay.setHours(0, 0, 0, 0);
+      document.getElementById("timeLabels").innerHTML = [0, 4, 8, 12, 16, 20, 24]
+        .map((hour) => {
+          const edgeClass = hour === 0 ? " start" : hour === 24 ? " end" : "";
+          return `<div class="time-label${edgeClass}" style="left: ${(hour / 24) * 100}%;">${hourLabel(hour)}</div>`;
+        })
+        .join("");
 
-      for (const record of todayRecords) {
-        const time = new Date(record.timestamp);
-        const hour = time.getHours();
-        if (!hourly[hour]) {
-          hourly[hour] = [];
+      const records = sortedRecords();
+      if (records.length === 0) {
+        document.getElementById("timelineBar").innerHTML = '<div class="segment idle" style="flex: 1;">No data</div>';
+        document.getElementById("legend").innerHTML = "";
+        return;
+      }
+
+      const segments = [];
+      let cursor = 0;
+
+      for (let i = 0; i < records.length - 1; i += 1) {
+        const record = records[i];
+        const next = records[i + 1];
+        const start = Math.max(cursor, minutesSinceLocalMidnight(new Date(record.timestamp)));
+        const end = Math.max(start, minutesSinceLocalMidnight(new Date(next.timestamp)));
+        const duration = end - start;
+
+        if (duration <= 0) {
+          continue;
         }
-        hourly[hour].push(record);
-      }
 
-      // Create time labels (0:00, 4:00, 8:00, etc.)
-      let timeLabelsHtml = '';
-      for (let h = 0; h < 24; h += 4) {
-        timeLabelsHtml += `<div class="time-label">${String(h).padStart(2, '0')}:00</div>`;
-      }
-      document.getElementById('timeLabels').innerHTML = timeLabelsHtml;
-      document.getElementById('timeLabels2').innerHTML = timeLabelsHtml;
-
-      // Render power state bar
-      let powerHtml = '';
-      for (let h = 0; h < 24; h++) {
-        const records = hourly[h] || [];
-        if (records.length === 0) {
-          powerHtml += '<div class="power-segment off">—</div>';
-        } else {
-          const lastRecord = records[records.length - 1];
-          const powerState = lastRecord.powerState;
-          const isOn = powerState === 'On';
-          powerHtml += `<div class="power-segment ${isOn ? 'on' : 'off'}">${isOn ? '●' : '○'}</div>`;
+        if (start > cursor) {
+          segments.push({ type: "idle", label: "", minutes: start - cursor, title: "No samples" });
         }
-      }
-      document.getElementById('powerBar').innerHTML = powerHtml;
 
-      // Render app bar
-      let appHtml = '';
-      for (let h = 0; h < 24; h++) {
-        const records = hourly[h] || [];
-        if (records.length === 0) {
-          appHtml += '<div class="app-segment" style="background: #eee;">—</div>';
-        } else {
-          const lastRecord = records[records.length - 1];
-          const appName = lastRecord.activeAppName || 'Unknown';
-          const color = COLORS[appName] || '#999';
-          const powerState = lastRecord.powerState;
-          const isOff = powerState !== 'On';
-          appHtml += `<div class="app-segment ${isOff ? 'grayed-out' : ''}" style="background: ${isOff ? '#ccc' : color};" title="${appName}">${appName.substring(0, 3).toUpperCase()}</div>`;
-        }
+        const isGap = duration > GAP_THRESHOLD_MINUTES && dashboardData.dataGaps.some((gap) => gap.start === record.timestamp && gap.end === next.timestamp);
+        segments.push({
+          type: isGap ? "gap" : (record.watched ? "app" : "idle"),
+          appName: record.activeAppName || "Unknown",
+          label: record.watched && !isGap ? (record.activeAppName || "?").slice(0, 4).toUpperCase() : "",
+          minutes: duration,
+          title: isGap ? `Data gap: ${formatTimeRange(record.timestamp, next.timestamp)}` : `${record.activeAppName || "Unknown"}: ${formatTimeRange(record.timestamp, next.timestamp)}`
+        });
+        cursor = end;
       }
-      document.getElementById('appBar').innerHTML = appHtml;
 
-      // Create legend
-      const uniqueApps = [...new Set(todayRecords.map(r => r.activeAppName))].sort();
-      let legendHtml = '<div class="legend-title">Apps</div><div class="legend-items">';
-      for (const app of uniqueApps) {
-        const color = COLORS[app] || '#999';
-        legendHtml += `<div class="legend-item"><div class="legend-color" style="background: ${color};"></div><span>${app}</span></div>`;
+      const lastRecord = records[records.length - 1];
+      const lastMinute = minutesSinceLocalMidnight(new Date(lastRecord.timestamp));
+      if (lastMinute > cursor) {
+        segments.push({
+          type: lastRecord.watched ? "app" : "idle",
+          appName: lastRecord.activeAppName || "Unknown",
+          label: lastRecord.watched ? (lastRecord.activeAppName || "?").slice(0, 4).toUpperCase() : "",
+          minutes: Math.min(1, lastMinute - cursor),
+          title: `${lastRecord.activeAppName || "Unknown"} sampled at ${formatTime(lastRecord.timestamp)}`
+        });
+        cursor = lastMinute;
       }
-      legendHtml += '</div>';
-      document.getElementById('legend').innerHTML = legendHtml;
+
+      if (cursor < DAY_MINUTES) {
+        segments.push({ type: "idle", label: "", minutes: DAY_MINUTES - cursor, title: "No samples yet" });
+      }
+
+      document.getElementById("timelineBar").innerHTML = segments.map((segment) => {
+        const color = segment.type === "app" ? appColor(segment.appName) : IDLE_COLOR;
+        const style = `flex: ${Math.max(segment.minutes, 0.5)};${segment.type === "app" ? ` background: ${color};` : ""}`;
+        return `<div class="segment ${segment.type}" style="${style}" title="${segment.title}">${segment.label}</div>`;
+      }).join("");
+
+      const apps = [...new Set(records.map((record) => record.activeAppName || "Unknown"))].sort();
+      document.getElementById("legend").innerHTML = apps.map((app) => `
+        <div class="legend-item">
+          <div class="legend-color" style="background: ${appColor(app)};"></div>
+          <span>${app}</span>
+        </div>
+      `).join("") + `
+        <div class="legend-item">
+          <div class="legend-color" style="background: #fdba74;"></div>
+          <span>Data gap</span>
+        </div>
+      `;
     }
 
-    // Initial fetch
-    fetchData();
+    function renderAppUsage() {
+      const usage = dashboardData.appUsage;
+      if (!usage.length) {
+        document.getElementById("appUsage").innerHTML = '<div class="empty">No app watch time recorded today.</div>';
+        return;
+      }
 
-    // Refresh every 30 seconds
+      const maxMinutes = Math.max(...usage.map((item) => item.minutes), 1);
+      document.getElementById("appUsage").innerHTML = usage.map((item) => {
+        const width = Math.max(4, (item.minutes / maxMinutes) * 100);
+        return `
+          <div class="usage-row">
+            <div>${item.appName}</div>
+            <div class="usage-bar">
+              <div class="usage-fill" style="width: ${width}%; background: ${appColor(item.appName)};"></div>
+            </div>
+            <div>${minutesLabel(item.minutes)}</div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderGaps() {
+      const gaps = dashboardData.dataGaps;
+      if (!gaps.length) {
+        document.getElementById("gaps").innerHTML = '<div class="empty">No gaps larger than the polling window.</div>';
+        return;
+      }
+
+      document.getElementById("gaps").innerHTML = gaps.map((gap) => `
+        <div class="gap-row">
+          <div>${formatTimeRange(gap.start, gap.end)}</div>
+          <div>${minutesLabel(gap.minutes)}</div>
+        </div>
+      `).join("");
+    }
+
+    updateClock();
+    fetchData();
+    setInterval(updateClock, 1000);
     setInterval(fetchData, 30000);
   </script>
 </body>
