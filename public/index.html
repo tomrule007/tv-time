@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TV Time Dashboard</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f5f5f5;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 8px;
+      padding: 30px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    .date {
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 30px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .stat {
+      padding: 15px;
+      background: #f9f9f9;
+      border-left: 4px solid #4CAF50;
+      border-radius: 4px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: #666;
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .timeline {
+      margin-top: 30px;
+    }
+
+    .timeline-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #666;
+      margin-bottom: 10px;
+    }
+
+    .time-labels {
+      display: flex;
+      gap: 0;
+      margin-bottom: 5px;
+      font-size: 12px;
+      color: #999;
+    }
+
+    .time-label {
+      flex: 1;
+      text-align: center;
+    }
+
+    .power-bar {
+      display: flex;
+      gap: 0;
+      height: 30px;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 15px;
+    }
+
+    .power-segment {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      color: white;
+      font-weight: bold;
+      position: relative;
+      border-right: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .power-segment:last-child {
+      border-right: none;
+    }
+
+    .power-segment.on {
+      background: #4CAF50;
+    }
+
+    .power-segment.off {
+      background: #ccc;
+      color: #999;
+    }
+
+    .app-bar {
+      display: flex;
+      gap: 0;
+      height: 60px;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 15px;
+    }
+
+    .app-segment {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      color: white;
+      font-weight: bold;
+      position: relative;
+      border-right: 1px solid rgba(255, 255, 255, 0.3);
+      text-align: center;
+      padding: 5px;
+      opacity: 1;
+      transition: opacity 0.2s;
+    }
+
+    .app-segment.grayed-out {
+      opacity: 0.3;
+      background: #ccc !important;
+      color: #999 !important;
+    }
+
+    .app-segment:last-child {
+      border-right: none;
+    }
+
+    .legend {
+      margin-top: 20px;
+      padding: 15px;
+      background: #f9f9f9;
+      border-radius: 4px;
+    }
+
+    .legend-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: #666;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+
+    .legend-items {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+    }
+
+    .legend-color {
+      width: 16px;
+      height: 16px;
+      border-radius: 2px;
+    }
+
+    .loading {
+      text-align: center;
+      color: #666;
+      padding: 40px;
+    }
+
+    .error {
+      background: #fee;
+      color: #c33;
+      padding: 15px;
+      border-radius: 4px;
+      margin-bottom: 20px;
+      border-left: 4px solid #c33;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📺 TV Time Dashboard</h1>
+    <div class="date" id="date"></div>
+
+    <div id="error" class="error" style="display: none;"></div>
+
+    <div id="stats" class="stats"></div>
+
+    <div class="timeline">
+      <div class="timeline-title">Power State Timeline</div>
+      <div class="time-labels" id="timeLabels"></div>
+      <div class="power-bar" id="powerBar"></div>
+
+      <div class="timeline-title">App Timeline</div>
+      <div class="time-labels" id="timeLabels2"></div>
+      <div class="app-bar" id="appBar"></div>
+
+      <div class="legend" id="legend"></div>
+    </div>
+
+    <div id="loading" class="loading">Loading...</div>
+  </div>
+
+  <script>
+    const COLORS = {
+      'Unknown': '#999',
+      'Home': '#2196F3',
+      'Netflix': '#E50914',
+      'YouTube': '#FF0000',
+      'Hulu': '#1CE783',
+      'Disney+': '#113CCF',
+      'Prime Video': '#00A8E1',
+      'Plex': '#FFB000',
+      'Roku': '#662D91'
+    };
+
+    const HOUR_HEIGHT_PIXELS = 60; // pixels per hour for hourly segments
+    let todayRecords = [];
+
+    async function fetchData() {
+      try {
+        const response = await fetch('/api/status/today');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+
+        if (data.error) {
+          throw new Error(data.error);
+        }
+
+        todayRecords = data.records || [];
+        renderDashboard();
+      } catch (error) {
+        showError('Failed to fetch data: ' + error.message);
+        document.getElementById('loading').style.display = 'none';
+      }
+    }
+
+    function showError(message) {
+      const errorDiv = document.getElementById('error');
+      errorDiv.textContent = message;
+      errorDiv.style.display = 'block';
+    }
+
+    function renderDashboard() {
+      document.getElementById('loading').style.display = 'none';
+
+      // Set date
+      const today = new Date().toISOString().split('T')[0];
+      const dateStr = new Date(today).toLocaleDateString('en-US', { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      });
+      document.getElementById('date').textContent = dateStr;
+
+      // Calculate stats
+      if (todayRecords.length > 0) {
+        let watching = 0;
+        let totalTime = 0;
+
+        for (let i = 1; i < todayRecords.length; i++) {
+          const prev = todayRecords[i - 1];
+          const curr = todayRecords[i];
+          const prevTime = new Date(prev.timestamp).getTime();
+          const currTime = new Date(curr.timestamp).getTime();
+          const deltaMinutes = Math.min((currTime - prevTime) / 60000, 15);
+
+          if (prev.watched) {
+            watching += deltaMinutes;
+          }
+          totalTime += deltaMinutes;
+        }
+
+        const statsHtml = `
+          <div class="stat">
+            <div class="stat-label">Today's Usage</div>
+            <div class="stat-value">${Math.round(watching)}<span style="font-size: 14px;">m</span></div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Current Status</div>
+            <div class="stat-value">${todayRecords[todayRecords.length - 1].powerState === 'On' ? '🟢 On' : '⚫ Off'}</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Recordings</div>
+            <div class="stat-value">${todayRecords.length}</div>
+          </div>
+        `;
+
+        document.getElementById('stats').innerHTML = statsHtml;
+      }
+
+      renderTimeline();
+    }
+
+    function renderTimeline() {
+      // Group records by hour
+      const hourly = {};
+      const startOfDay = new Date();
+      startOfDay.setHours(0, 0, 0, 0);
+
+      for (const record of todayRecords) {
+        const time = new Date(record.timestamp);
+        const hour = time.getHours();
+        if (!hourly[hour]) {
+          hourly[hour] = [];
+        }
+        hourly[hour].push(record);
+      }
+
+      // Create time labels (0:00, 4:00, 8:00, etc.)
+      let timeLabelsHtml = '';
+      for (let h = 0; h < 24; h += 4) {
+        timeLabelsHtml += `<div class="time-label">${String(h).padStart(2, '0')}:00</div>`;
+      }
+      document.getElementById('timeLabels').innerHTML = timeLabelsHtml;
+      document.getElementById('timeLabels2').innerHTML = timeLabelsHtml;
+
+      // Render power state bar
+      let powerHtml = '';
+      for (let h = 0; h < 24; h++) {
+        const records = hourly[h] || [];
+        if (records.length === 0) {
+          powerHtml += '<div class="power-segment off">—</div>';
+        } else {
+          const lastRecord = records[records.length - 1];
+          const powerState = lastRecord.powerState;
+          const isOn = powerState === 'On';
+          powerHtml += `<div class="power-segment ${isOn ? 'on' : 'off'}">${isOn ? '●' : '○'}</div>`;
+        }
+      }
+      document.getElementById('powerBar').innerHTML = powerHtml;
+
+      // Render app bar
+      let appHtml = '';
+      for (let h = 0; h < 24; h++) {
+        const records = hourly[h] || [];
+        if (records.length === 0) {
+          appHtml += '<div class="app-segment" style="background: #eee;">—</div>';
+        } else {
+          const lastRecord = records[records.length - 1];
+          const appName = lastRecord.activeAppName || 'Unknown';
+          const color = COLORS[appName] || '#999';
+          const powerState = lastRecord.powerState;
+          const isOff = powerState !== 'On';
+          appHtml += `<div class="app-segment ${isOff ? 'grayed-out' : ''}" style="background: ${isOff ? '#ccc' : color};" title="${appName}">${appName.substring(0, 3).toUpperCase()}</div>`;
+        }
+      }
+      document.getElementById('appBar').innerHTML = appHtml;
+
+      // Create legend
+      const uniqueApps = [...new Set(todayRecords.map(r => r.activeAppName))].sort();
+      let legendHtml = '<div class="legend-title">Apps</div><div class="legend-items">';
+      for (const app of uniqueApps) {
+        const color = COLORS[app] || '#999';
+        legendHtml += `<div class="legend-item"><div class="legend-color" style="background: ${color};"></div><span>${app}</span></div>`;
+      }
+      legendHtml += '</div>';
+      document.getElementById('legend').innerHTML = legendHtml;
+    }
+
+    // Initial fetch
+    fetchData();
+
+    // Refresh every 30 seconds
+    setInterval(fetchData, 30000);
+  </script>
+</body>
+</html>
