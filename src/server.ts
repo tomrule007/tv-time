@@ -3,6 +3,7 @@ import path from 'path';
 import app from './app';
 import config from './config';
 import { pollAndEvaluateCurrentState } from './tvTime';
+import { startSsdpServer } from './ssdp';
 
 const port = config.serverPort;
 const dataDir = path.resolve(process.cwd(), 'data');
@@ -38,4 +39,5 @@ app.listen(port, '0.0.0.0', () => {
   console.log(`TV-TIME backend listening on http://localhost:${port}`);
   console.log(`LAN access enabled on http://0.0.0.0:${port}`);
   startPollingLoop();
+  startSsdpServer();
 });
