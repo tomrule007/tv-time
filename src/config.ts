@@ -17,7 +17,8 @@ const config = {
     6: undefined as number | undefined  // Saturday
   },
   pollIntervalMs: 30_000,
-  stateLogPath: 'data/state.log'
+  stateLogPath: 'data/state.log',
+  exemptAppIds: [] as string[]
 };
 
 export function getDayLimit(dateTime: Date, timeZone: string): number {

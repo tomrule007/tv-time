@@ -2,8 +2,13 @@ import config, { getDayLimit } from './config';
 import { getRokuState, launchRokuApp, RokuState } from './roku';
 import { appendStateRecord, readAllStateRecords, StateRecord } from './db';
 
+function isExempt(state: RokuState): boolean {
+  const activeId = state.activeAppId.toLowerCase();
+  return config.exemptAppIds.some(id => id.toLowerCase() === activeId);
+}
+
 function isWatching(state: RokuState): boolean {
-  return !isHomeScreen(state) && !isTvTimeApp(state) && state.activeAppId.toLowerCase() !== 'unknown' && state.powerState !== 'PowerOff';
+  return !isHomeScreen(state) && !isTvTimeApp(state) && !isExempt(state) && state.activeAppId.toLowerCase() !== 'unknown' && state.powerState !== 'PowerOff';
 }
 
 function isHomeScreen(state: RokuState): boolean {
@@ -62,25 +67,35 @@ function computeDailyUsageMinutes(records: StateRecord[]): number {
 
 function computeUsageByApp(records: StateRecord[]) {
   const byApp: Record<string, number> = {};
+  const exemptByApp: Record<string, number> = {};
+  const appIds: Record<string, string> = {};
   let totalMinutes = 0;
 
   for (const record of records) {
+    const pollTimeMinutes = (record.pollTime || config.pollIntervalMs) / 60000;
+    const appName = record.activeAppName || 'Unknown';
+    const appId = record.activeAppId;
+    appIds[appName] = appId;
+
     // Re-compute watched status using centralized exclusion logic to ensure consistency
     const isCurrentlyWatching = isWatching(record as RokuState);
     
     if (isCurrentlyWatching) {
-      const pollTimeMinutes = (record.pollTime || config.pollIntervalMs) / 60000;
       totalMinutes += pollTimeMinutes;
-      const appName = record.activeAppName || 'Unknown';
       byApp[appName] = (byApp[appName] || 0) + pollTimeMinutes;
+    } else if (isExempt(record as RokuState)) {
+      exemptByApp[appName] = (exemptByApp[appName] || 0) + pollTimeMinutes;
     }
   }
 
+  const mapUsage = (data: Record<string, number>) => Object.entries(data)
+    .map(([appName, minutes]) => ({ appName, appId: appIds[appName], minutes: Math.round(minutes) }))
+    .sort((a, b) => b.minutes - a.minutes);
+
   return {
     totalMinutes,
-    byApp: Object.entries(byApp)
-      .map(([appName, minutes]) => ({ appName, minutes: Math.round(minutes) }))
-      .sort((a, b) => b.minutes - a.minutes)
+    byApp: mapUsage(byApp),
+    exemptAppUsage: mapUsage(exemptByApp)
   };
 }
 
@@ -167,6 +182,7 @@ export async function getTodayData() {
     dailyLimitMinutes: dayLimit,
     todayUsageMinutes: Math.round(usage.totalMinutes),
     appUsage: usage.byApp,
+    exemptAppUsage: usage.exemptAppUsage,
     dataGaps: detectDataGaps(enrichedRecords),
     records: enrichedRecords
   };

@@ -198,6 +198,15 @@
       font-size: 14px;
     }
 
+    .app-name {
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .app-name:hover {
+      color: #2f80ed;
+      text-decoration: underline;
+    }
+
     .usage-bar {
       height: 12px;
       border-radius: 999px;
@@ -314,6 +323,8 @@
       <div>
         <div class="section-title">App Stats</div>
         <div class="app-usage" id="appUsage"></div>
+        <div class="section-title" style="margin-top: 28px;">Exempt Apps</div>
+        <div class="app-usage" id="exemptAppUsage"></div>
       </div>
       <div>
         <div class="section-title">Data Gaps</div>
@@ -458,6 +469,7 @@
       renderStats();
       renderTimeline();
       renderAppUsage();
+      renderExemptUsage();
       renderGaps();
     }
 
@@ -590,7 +602,7 @@
         const width = Math.max(4, (item.minutes / maxMinutes) * 100);
         return `
           <div class="usage-row">
-            <div>${item.appName}</div>
+            <div class="app-name" onclick="toggleExempt('${item.appId}')" title="Click to exempt app">${item.appName}</div>
             <div class="usage-bar">
               <div class="usage-fill" style="width: ${width}%; background: ${appColor(item.appName)};"></div>
             </div>
@@ -598,6 +610,44 @@
           </div>
         `;
       }).join("");
+    }
+
+    function renderExemptUsage() {
+      const usage = dashboardData.exemptAppUsage || [];
+      const container = document.getElementById("exemptAppUsage");
+      if (!usage.length) {
+        container.innerHTML = '<div class="empty">No exempt apps recorded today.</div>';
+        return;
+      }
+
+      const maxMinutes = Math.max(...usage.map((item) => item.minutes), 1);
+      container.innerHTML = usage.map((item) => {
+        const width = Math.max(4, (item.minutes / maxMinutes) * 100);
+        return `
+          <div class="usage-row">
+            <div class="app-name" onclick="toggleExempt('${item.appId}')" title="Click to track app">${item.appName}</div>
+            <div class="usage-bar">
+              <div class="usage-fill" style="width: ${width}%; background: ${IDLE_COLOR};"></div>
+            </div>
+            <div>${minutesLabel(item.minutes)}</div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    async function toggleExempt(appId) {
+      if (!appId || appId === 'unknown') return;
+      try {
+        const response = await fetch('/api/config/toggle-exempt', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ appId })
+        });
+        if (!response.ok) throw new Error('Failed to update app status');
+        fetchData();
+      } catch (error) {
+        showError(`Error: ${error.message}`);
+      }
     }
 
     function renderGaps() {

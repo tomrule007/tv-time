@@ -2,6 +2,7 @@ import path from 'path';
 import express from 'express';
 import statusRouter from './routes/status';
 import { getDailyLimitStatus } from './tvTime';
+import config from './config';
 
 const app = express();
 
@@ -30,6 +31,22 @@ app.get('/ssdp/device-desc.xml', (req, res) => {
 // Health check endpoint used by Roku discovery fallback
 app.get('/api/status/limit', async (req, res) => {
   res.json(await getDailyLimitStatus());
+});
+
+app.post('/api/config/toggle-exempt', (req, res) => {
+  const { appId } = req.body;
+  if (!appId || appId.toLowerCase() === 'unknown') {
+    return res.status(400).json({ error: 'Valid appId is required' });
+  }
+
+  const index = config.exemptAppIds.findIndex(id => id.toLowerCase() === appId.toLowerCase());
+  if (index > -1) {
+    config.exemptAppIds.splice(index, 1);
+    res.json({ message: `App ${appId} removed from exempt list`, exemptAppIds: config.exemptAppIds });
+  } else {
+    config.exemptAppIds.push(appId);
+    res.json({ message: `App ${appId} added to exempt list`, exemptAppIds: config.exemptAppIds });
+  }
 });
 
 app.get('/api', (req, res) => {
